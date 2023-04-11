@@ -1,1 +1,1 @@
-kafka cluster made with docker-compose.yml on 3 different virtual hosts
+kafka cluster made with docker-compose on 3 different virtual hosts
