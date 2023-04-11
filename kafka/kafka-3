@@ -1,0 +1,54 @@
+version: '3'
+services:
+  zookeeper-3:
+    image: confluentinc/cp-zookeeper:7.3.3
+    hostname: zookeeper-3
+    network_mode: host
+    container_name: zookeeper-3
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2182
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_SERVERS: "192.168.60.31:2282:2382;192.168.60.32:2282:2382;192.168.60.33:2282:2382"
+    volumes:
+     - /root/cluster/zookeeper-3:/var/lib/zookeeper/data
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.3.3
+    hostname: kafka-3
+    restart: always
+    network_mode: host
+    container_name: kafka-3
+    depends_on:
+      - zookeeper-3
+    volumes:
+      - /root/cluster/kafka-3:/var/lib/kafka/data
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: 192.168.60.31:2182,192.168.60.32:2182,192.168.60.33:2182
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.60.33:9092,PLAINTEXT_HOST://192.168.60.33:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: always
+    network_mode: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    restart: always
