@@ -1,6 +1,11 @@
-version: '3'
+version: '3.4'
 services:
   zookeeper-1:
+    deploy:
+        resources:
+            limits:
+              cpus: "2.0"
+              memory: "2G"
     image: confluentinc/cp-zookeeper:7.3.3
     hostname: zookeeper-1
     restart: always
@@ -17,24 +22,33 @@ services:
      - /root/cluster/zookeeper-1:/var/lib/zookeeper/data
 
   kafka-1:
+    deploy:
+        resources:
+            limits:
+              cpus: "2.0"
+              memory: "4G"
     image: confluentinc/cp-kafka:7.3.3
     hostname: kafka-1
     restart: always
     network_mode: host
     container_name: kafka-1
-    depends_on:
-      - zookeeper-1
     volumes:
       - /root/cluster/kafka-1:/var/lib/kafka/data
     environment:
+      KAFKA_HEAP_OPTS: '-Xms1g -Xmx4g'
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 192.168.60.31:2182,192.168.60.32:2182,192.168.60.33:2182
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.60.31:9092,PLAINTEXT_HOST://192.168.60.31:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.60.31:9092,PLAINTEXT_HOST://192.168.60.31.azercell.com:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
 
   node-exporter:
+    deploy:
+        resources:
+            limits:
+              cpus: "0.5"
+              memory: "500M"
     image: quay.io/prometheus/node-exporter:latest
     container_name: node-exporter
     hostname: node-exporter
