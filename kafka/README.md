@@ -1,5 +1,7 @@
 kafka cluster made with docker-compose on 3 different virtual hosts
 
+before start you have to create folders with ownership for appuser ( user which container uses )
+for example: useradd -u 1000 -m -s /bin/bash appuser && mkdir -p /root/cluster/kafka-1 && chown -R appuser:appuser /root/cluster/kafka-1
 
 Confluent Kafka configuration
 
