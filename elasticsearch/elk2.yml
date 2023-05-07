@@ -1,0 +1,34 @@
+version: '3.1'
+services:
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: es02
+    hostname: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es_cluster
+      - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - xpack.security.enabled=false
+      - discovery.zen.ping.unicast.hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - xpack.monitoring.collection.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /root/elasticsearch:/usr/share/elasticsearch/data
+    network_mode: host
+
+  metricbeat02:
+    image: docker.elastic.co/beats/metricbeat:7.17.10
+    container_name: metricbeat02
+    hostname: metricbeat02
+    restart: always
+    environment:
+      ELASTICSEARCH_HOSTS: http://es01:9200,http://es02:9200,http://es03:9200
+    volumes:
+      - /root/metricbeat:/usr/share/metricbeat/data
+    depends_on:
+      - es02
+    network_mode: host
