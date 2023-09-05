@@ -1,0 +1,22 @@
+version: "3.1"
+services:
+  redis-node:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis
+    restart: always
+    extra_hosts:
+      redis-node-1: 10.72.32.236
+      redis-node-2: 10.72.32.7
+      redis-node-3: 10.72.32.226
+      redis-node-4: 10.72.32.163
+      redis-node-5: 10.72.32.93
+      redis-node-6: 10.72.32.62
+    network_mode: host
+    volumes:
+      - /root/redis/data:/bitnami/redis/data
+      - /root/redis/users:/bitnami/redis/users
+    environment:
+      REDIS_IO_THREADS: '100'
+      REDIS_ACLFILE: '/bitnami/redis/users/users.acl'
+      REDIS_PASSWORD: 'NhsHhDLSr2PNjMba2QK8'
+      REDIS_NODES: 'redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-node-6'
